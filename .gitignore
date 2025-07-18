@@ -1,0 +1,7 @@
+# If there are existing lines, keep them:
+venv/
+pycache/
+*.pyc
+
+# Add this new line:
+*.session
