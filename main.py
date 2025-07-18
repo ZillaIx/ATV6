@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 import asyncio
 from pyrogram import Client
+from flask import Flask  # <--- NEW: Import Flask
+import threading  # <--- NEW: Import threading
 
 load_dotenv() # This line loads the variables from your .env file locally
 
@@ -25,6 +27,28 @@ if not API_HASH:
 CHANNEL_USERNAME = "solearlytrending" # Set this to your target channel
 TARGET_USER = [-1002751333878, -1002238854475]
 PREFIX_TO_REMOVE = "https://t.me/soul_sniper_bot?start=15_" # The specific prefix to remove from URLs
+
+# --- NEW: Flask Web Server Setup ---
+web_app = Flask(__name__) # Initialize Flask app for the web server
+
+@web_app.route('/')
+def home():
+    """
+    A simple route that responds to HTTP requests.
+    This is what UptimeRobot will ping to keep the Repl alive.
+    """
+    return "Bot is running!"
+
+def run_web_server():
+    """
+    Function to run the Flask web server.
+    It listens on host 0.0.0.0 and the PORT environment variable provided by Replit.
+    """
+    port = os.getenv('PORT', 5000) # Get PORT from environment, default to 5000 for local testing
+    print(f"Starting web server on http://0.0.0.0:{port}")
+    web_app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
+# --- END NEW Flask Web Server Setup ---
+
 
 async def get_last_messages():
     """
@@ -137,4 +161,12 @@ async def get_last_messages():
             else:
                 print("\n--- From July 15th 2025 when you completed AutoTrencherV6 till now\n Congrats bro, you now have more than \n $1M ($1,000,000 +) \n Cash Out and Flex \n Thank Jehovah ---")
 
-asyncio.run(get_last_messages())
+if __name__ == "__main__":
+    # --- NEW: Start the Flask web server in a separate thread ---
+    web_thread = threading.Thread(target=run_web_server)
+    web_thread.daemon = True # Allow the main program to exit even if the thread is still running
+    web_thread.start()
+    # --- END NEW Flask Web Server Setup ---
+
+    # Your existing bot logic execution
+    asyncio.run(get_last_messages())
