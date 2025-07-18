@@ -1,5 +1,25 @@
+import os
+from dotenv import load_dotenv
 import asyncio
 from pyrogram import Client
+
+load_dotenv() # This line loads the variables from your .env file locally
+
+# Get the API ID and Hash from environment variables
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+
+# Important: Convert API_ID to an integer, as Pyrogram expects it
+if API_ID:
+    try:
+        API_ID = int(API_ID)
+    except ValueError:
+        print("Error: API_ID environment variable must be an integer.")
+        exit(1) # Or handle this error appropriately
+
+if not API_HASH:
+    print("Error: API_HASH environment variable not set.")
+    exit(1) # Or handle this error appropriately
 
 # Configuration variables
 CHANNEL_USERNAME = "solearlytrending" # Set this to your target channel
@@ -19,7 +39,8 @@ async def get_last_messages():
     # Initialize the Pyrogram Client.
     # "my_account" is the session name. If it doesn't exist, Pyrogram will ask
     # you to log in the first time you run the script.
-    async with Client("my_account") as app:
+    # MODIFIED: Passing api_id and api_hash from environment variables
+    async with Client("my_account", api_id=API_ID, api_hash=API_HASH) as app:
         # Outer loop to repeat the process x times
         for iteration in range(999999):
             print(f"\n--- Starting message processing iteration {iteration + 1} ---")
@@ -85,7 +106,7 @@ async def get_last_messages():
 
                     if processed_url:
                         print(f"--- Processed URL Part: {processed_url} ---")
-                        # --- Send Processed URL Part to Target User (only if new) ---            
+                        # --- Send Processed URL Part to Target User (only if new) ---
                         if processed_url not in sent_urls:
                             message_to_send = f"In This: \n- {processed_url}\n"
                             for user_id in TARGET_USER: # Iterate through each user ID
@@ -95,7 +116,7 @@ async def get_last_messages():
                                         text=message_to_send
                                     )
                                     print(f"Successfully sent NEW processed URL part to {user_id}")
-                                    
+
                                 except Exception as e:
                                     print(f"Failed to send processed URL part to {user_id}: {e}")
                             sent_urls.add(processed_url)
