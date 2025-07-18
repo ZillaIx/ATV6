@@ -5,3 +5,4 @@ pycache/
 
 # Add this new line:
 *.session
+*.session-journal
